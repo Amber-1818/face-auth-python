@@ -30,3 +30,4 @@ EXPOSE 5000
 
 # Use gunicorn to run the Flask app
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
