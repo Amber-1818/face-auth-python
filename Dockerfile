@@ -1,33 +1,25 @@
-# Use official Python runtime as parent image
 FROM python:3.10-slim
 
-# Set working directory
+# आवश्यक Linux packages
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    python3-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Precompiled dlib wheel install
+RUN pip install --upgrade pip
+RUN pip install https://github.com/datamagic2020/precompiled-dlib/raw/main/dlib-19.24.0-cp310-cp310-manylinux_2_17_x86_64.whl
+
+# बाकी requirements
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# App copy
+COPY . /app
 WORKDIR /app
 
-# Install OS dependencies for dlib / face-recognition / opencv
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        libopenblas-dev \
-        liblapack-dev \
-        libx11-dev \
-        libgtk2.0-dev && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file first (for better build caching)
-COPY requirements.txt .
-
-# Upgrade pip and install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy all application files
-COPY . .
-
-# Expose port (Flask default)
-EXPOSE 5000
-
-# Use gunicorn to run the Flask app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
-
+CMD ["python", "app.py"]
