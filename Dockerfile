@@ -2,30 +2,14 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# System dependencies required for face-recognition & dlib
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    libopenblas-dev \
-    liblapack-dev \
-    libjpeg-dev \
-    python3-dev \
-    git \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN pip install --upgrade pip
-
-# Install precompiled dlib wheel (FAST)
-RUN pip install https://github.com/wang-bin/prebuilt-dlib/raw/master/dlib-19.24.0-cp310-cp310-manylinux_2_17_x86_64.whl
-
-# Install remaining requirements
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
 COPY . .
-
-EXPOSE 5000
 
 CMD ["python", "app.py"]
